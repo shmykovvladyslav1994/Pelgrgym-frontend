@@ -31,7 +31,9 @@ export const exerciseRulesSchema = z.object({
     sets: z.array(
         exerciseSetSchema
     ).min(1),
-    incrementOrder: z.enum(['asc', 'desc']).optional()
+    incrementOrder: z.enum(['asc', 'desc']).optional(),
+    incrementIntervalPerDays: z.number().min(0),
+    incrementValue: z.number().min(0)
 })
 
 export type ExerciseRulesForm =

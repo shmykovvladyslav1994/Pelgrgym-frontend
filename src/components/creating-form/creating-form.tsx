@@ -94,6 +94,10 @@ function CreatingForm() {
             <option value="desc">Descending</option>
         </select>
 
+
+        <input placeholder="Increment Value" type="number" {...register('incrementValue', { valueAsNumber: true })} />
+        <input placeholder="Increment Interval Per Days" type="number" {...register('incrementIntervalPerDays', { valueAsNumber: true })} />
+
         {
             fields.map((field, index) => (
                 <div key={field.id}>

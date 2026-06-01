@@ -23,6 +23,8 @@ export interface ITraining {
     restIntervalSec: number;
 
     incrementOrder: 'asc' | 'desc' | null;
+    incrementIntervalPerDays: number;
+    incrementValue: number;
 }
 
 class ExerciseSet implements IExerciseSet {
@@ -48,6 +50,8 @@ export class Training implements ITraining {
     restIntervalSec: number;
 
     incrementOrder: 'asc' | 'desc' | null;
+    incrementIntervalPerDays: number;
+    incrementValue: number;
 
     constructor(id: number, data: ExerciseRulesForm, createdAt: string) {
         this.id = id;
@@ -57,5 +61,7 @@ export class Training implements ITraining {
         this.sets = data.sets.map(set => new ExerciseSet(set.reps, set.progressionRule ?? null));
         this.restIntervalSec = data.restIntervalSec;
         this.incrementOrder = data.incrementOrder ?? null;
+        this.incrementIntervalPerDays = data.incrementIntervalPerDays ?? 0;
+        this.incrementValue = data.incrementValue ?? 0;
     }
 }
