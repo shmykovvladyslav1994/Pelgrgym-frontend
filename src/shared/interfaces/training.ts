@@ -7,7 +7,6 @@ export interface ProgressionRule {
 
 export interface IExerciseSet {
     reps: number;
-    progressionRule: ProgressionRule | null;
 }
 
 export interface ITraining {
@@ -29,11 +28,9 @@ export interface ITraining {
 
 class ExerciseSet implements IExerciseSet {
     reps: number;
-    progressionRule: ProgressionRule | null;
 
-    constructor(reps: number, progressionRule: ProgressionRule | null) {
+    constructor(reps: number) {
         this.reps = reps;
-        this.progressionRule = progressionRule;
     }
 }
 
@@ -58,7 +55,7 @@ export class Training implements ITraining {
         this.name = data.name;
         this.createdAt = createdAt;
         this.trainingCycle = data.trainingCycle;
-        this.sets = data.sets.map(set => new ExerciseSet(set.reps, set.progressionRule ?? null));
+        this.sets = data.sets.map(set => new ExerciseSet(set.reps));
         this.restIntervalSec = data.restIntervalSec;
         this.incrementOrder = data.incrementOrder ?? null;
         this.incrementIntervalPerDays = data.incrementIntervalPerDays ?? 0;

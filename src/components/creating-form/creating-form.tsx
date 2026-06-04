@@ -113,22 +113,6 @@ function CreatingForm() {
                         )}
                     />
 
-                    <input
-                        type="number"
-                        placeholder="value"
-                        {...register(`sets.${index}.progressionRule.value`, {
-                            valueAsNumber: true
-                        })}
-                    />
-
-                    <select
-                        {...register(`sets.${index}.progressionRule.type`)}
-                    >
-                        <option value="reps">reps</option>
-                        <option value="weight">weight</option>
-                        <option value="rest">rest</option>
-                    </select>
-
                     <button
                         type="button"
                         onClick={() => remove(index)}
@@ -146,10 +130,6 @@ function CreatingForm() {
             onClick={() =>
                 append({
                     reps: 10,
-                    progressionRule: {
-                        type: 'reps',
-                        value: 1,
-                    }
                 })
             }
         >

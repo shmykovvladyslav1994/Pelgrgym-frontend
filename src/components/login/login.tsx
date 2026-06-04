@@ -4,7 +4,6 @@ import { api } from '../../api/api'
 import type { IUser } from '../../shared/interfaces/user'
 
 function Login() {
-    console.log('Login rendered');
 
     const { loginByGoogle } = useAuth()
 

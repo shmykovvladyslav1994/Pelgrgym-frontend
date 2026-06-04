@@ -1,17 +1,7 @@
 import { z } from 'zod'
 
-export const progressionRuleSchema = z.object({
-    type: z.enum([
-        'reps',
-        'weight',
-        'rest'
-    ]),
-    value: z.number().min(0)
-})
-
 export const exerciseSetSchema = z.object({
     reps: z.number().min(1),
-    progressionRule: progressionRuleSchema.optional()
 })
 
 export const trainingCycleSchema = z.object({
