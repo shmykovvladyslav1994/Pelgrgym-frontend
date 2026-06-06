@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import type { ExerciseRulesForm } from "../../components/creating-form/schema";
 
 export interface ProgressionRule {
@@ -12,7 +13,7 @@ export interface IExerciseSet {
 export interface ITraining {
     id: number;
     name: string;
-    createdAt: string;
+    createdAt: dayjs.Dayjs;
 
     trainingCycle: {
         workDays: number;
@@ -21,7 +22,7 @@ export interface ITraining {
     sets: IExerciseSet[];
     restIntervalSec: number;
 
-    incrementOrder: 'asc' | 'desc' | null;
+    incrementOrder: 'Asc' | 'Desc' | null;
     incrementIntervalPerDays: number;
     incrementValue: number;
 }
@@ -37,7 +38,7 @@ class ExerciseSet implements IExerciseSet {
 export class Training implements ITraining {
     id: number;
     name: string;
-    createdAt: string;
+    createdAt: dayjs.Dayjs;
 
     trainingCycle: {
         workDays: number;
@@ -46,14 +47,14 @@ export class Training implements ITraining {
     sets: IExerciseSet[];
     restIntervalSec: number;
 
-    incrementOrder: 'asc' | 'desc' | null;
+    incrementOrder: 'Asc' | 'Desc' | null;
     incrementIntervalPerDays: number;
     incrementValue: number;
 
     constructor(id: number, data: ExerciseRulesForm, createdAt: string) {
         this.id = id;
         this.name = data.name;
-        this.createdAt = createdAt;
+        this.createdAt = dayjs(createdAt);
         this.trainingCycle = data.trainingCycle;
         this.sets = data.sets.map(set => new ExerciseSet(set.reps));
         this.restIntervalSec = data.restIntervalSec;

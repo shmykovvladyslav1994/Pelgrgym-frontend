@@ -90,8 +90,8 @@ function CreatingForm() {
         <select
             {...register(`incrementOrder`)}
         >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
+            <option value="Asc">Ascending</option>
+            <option value="Desc">Descending</option>
         </select>
 
 

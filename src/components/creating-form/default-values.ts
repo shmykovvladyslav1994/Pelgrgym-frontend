@@ -7,8 +7,8 @@ export const defaultValues: ExerciseRulesForm = {
         workDays: 5,
         restDays: 2
     },
-    sets: [{ reps: 10, progressionRule: { type: 'reps', value: 1 } }],
-    incrementOrder: 'asc',
+    sets: [{ reps: 10 }],
+    incrementOrder: 'Asc',
     incrementIntervalPerDays: 1,
     incrementValue: 1,
 }
