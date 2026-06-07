@@ -1,4 +1,4 @@
-import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
 import { lazy, Suspense, useEffect } from 'react'
 import ProtectedRoute from './routes/protected-route'
@@ -9,7 +9,7 @@ import weekday from 'dayjs/plugin/weekday'
 import localeData from 'dayjs/plugin/localeData'
 import 'dayjs/locale/ru'
 import dayjs from 'dayjs'
-import { useAuth } from './context/auth-context'
+import Header from './components/header/header'
 
 const Login = lazy(() => import('./components/login/login'))
 const Home = lazy(() => import('./components/home/home'))
@@ -19,7 +19,6 @@ const TrainingsListContainer = lazy(() => import('./components/trainings-list-co
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user } = useAuth()
 
   useEffect(() => {
     setNavigate(navigate)
@@ -34,13 +33,7 @@ function App() {
 
   return (
     <>
-      <header>
-        <nav>
-          {user ? <Link to="/">Home</Link> : <Link to="/login">Login</Link>} |
-          <Link to="/make-new">Make new</Link> |
-          <Link to="/trainings">Trainings</Link>
-        </nav>
-      </header>
+      <Header />
 
       <Suspense fallback={<h2>Loading...</h2>}>
         <Routes>
