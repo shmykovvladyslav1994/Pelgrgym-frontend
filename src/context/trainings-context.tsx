@@ -75,6 +75,14 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
         return Math.floor(workDaysFromStart / incrementIntervalPerDays);
     }
 
+    const calculateIsRestDay = (current: dayjs.Dayjs, createdAt: dayjs.Dayjs, trainingCycle: { workDays: number, restDays: number },) => {
+        const daysFromStart = current.diff(createdAt.startOf('day'), 'day');
+        const fullCycle = trainingCycle.workDays + trainingCycle.restDays;
+        const completedCycles =
+            Math.floor(daysFromStart / fullCycle);
+        return daysFromStart - (completedCycles * fullCycle) >= trainingCycle.workDays;
+    }
+
     const calculateCalendar = () => {
         const days: { date: dayjs.Dayjs; isSelectedMonth: boolean, exercises: { name: string, sets: IExerciseSet[] }[] }[] = []
 
@@ -96,32 +104,33 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
 
                 if (createdAt.isBefore(current, 'day')) {
                     const incrementsFromStart = calculateIncrementsFromStart(current, createdAt, trainingCycle, incrementIntervalPerDays)
+                    const isRestDay = calculateIsRestDay(current, createdAt, trainingCycle);
 
-                    const lastIndex = sets.length - 1;
-                    let currentIncrementIndex = incrementOrder === 'Asc' ? 0 : lastIndex;
-                    let newSets = sets.map(set => ({ ...set }));
+                    if (!isRestDay) {
+                        const lastIndex = sets.length - 1;
+                        let currentIncrementIndex = incrementOrder === 'Asc' ? 0 : lastIndex;
+                        const newSets = sets.map(set => ({ ...set }));
+                        for (let i = 1; i <= incrementsFromStart; i++) {
+                            const setToIncrement = newSets.at(currentIncrementIndex)
+                            setToIncrement && (setToIncrement.reps += incrementValue);
 
-                    for (let i = 1; i <= incrementsFromStart; i++) {
-                        const setToIncrement = newSets.at(currentIncrementIndex)
-                        setToIncrement && (setToIncrement.reps += incrementValue);
+                            switch (incrementOrder) {
+                                case 'Asc':
+                                    currentIncrementIndex++;
+                                    currentIncrementIndex = currentIncrementIndex > lastIndex ? 0 : currentIncrementIndex;
+                                    break;
+                                case 'Desc':
+                                    currentIncrementIndex--;
+                                    currentIncrementIndex = currentIncrementIndex < 0 ? lastIndex : currentIncrementIndex;
+                                    break;
+                            }
 
-                        switch (incrementOrder) {
-                            case 'Asc':
-                                currentIncrementIndex++;
-                                currentIncrementIndex = currentIncrementIndex > lastIndex ? 0 : currentIncrementIndex;
-                                break;
-                            case 'Desc':
-                                currentIncrementIndex--;
-                                currentIncrementIndex = currentIncrementIndex < 0 ? lastIndex : currentIncrementIndex;
-                                break;
                         }
-
+                        acc.push({
+                            name: name,
+                            sets: newSets,
+                        })
                     }
-
-                    acc.push({
-                        name: name,
-                        sets: newSets,
-                    })
                 }
 
                 return acc;
