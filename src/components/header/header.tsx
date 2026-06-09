@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom"
+Rimport { Link } from "react-router-dom"
 import { useAuth } from "../../context/auth-context"
 
 function Header() {
     const { user, logout } = useAuth()
-    const links = [
+    const HEADER_LINKS = [
         { to: '/make-new', label: 'Make new' },
         { to: '/trainings', label: 'Trainings' },
     ]
