@@ -24,6 +24,7 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
 
     // проверка при старте
     useEffect(() => {
+        trainingEvents
         let trainingsRes: ITraining[]
         api.get('/trainings').then(
             res => {
