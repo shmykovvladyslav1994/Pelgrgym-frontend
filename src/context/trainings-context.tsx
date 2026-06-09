@@ -3,6 +3,7 @@ import type { ITrainingsContext } from "./interfaces/trainings-context"
 import type { IExerciseSet, ITraining } from "../shared/interfaces/training"
 import { api } from "../api/api"
 import dayjs from "dayjs"
+import type { ITrainingEvent, trainingEventResult } from "../shared/interfaces/training-event"
 
 const TrainingsContext = createContext<ITrainingsContext>({
     trainings: [],
@@ -19,12 +20,33 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
     const [selectedDate, setSelectedDate] = useState(dayjs())
     const [selectedMonth, setSelectedMonth] = useState(selectedDate.month())
+    const [trainingEvents, setTrainingEvents] = useState(new Map<number, Map<string, trainingEventResult>>())
 
     // проверка при старте
     useEffect(() => {
+        let trainingsRes: ITraining[]
         api.get('/trainings').then(
             res => {
-                setTrainings(res.map((training: ITraining) => ({
+                trainingsRes = res
+
+                return res.map((training: ITraining) => training.id)
+            }
+        ).then(
+            (ids: number[]) => Promise.all(ids.map(id => api.get('/training-events/' + id)))
+        ).then(
+            (res: ITrainingEvent[][]) => {
+                setTrainingEvents(res.flat().reduce((map, { trainingId, date, result }) => {
+                    // format YYYY-MM-DD
+                    const slicedDate = date.slice(0, 10);
+                    if (map.has(trainingId)) {
+                        map.get(trainingId)?.set(slicedDate, result);
+                    } else {
+                        map.set(trainingId, new Map().set(slicedDate, result));
+                    }
+                    return map
+                }, new Map<number, Map<string, trainingEventResult>>()))
+
+                setTrainings(trainingsRes.map((training: ITraining) => ({
                     ...training,
                     createdAt: dayjs(training.createdAt)
                 })))
@@ -150,7 +172,7 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
         return days
     };
 
-    const calendar = useMemo(() => calculateCalendar(), [trainings, selectedMonth])
+    const calendar = useMemo(() => loading ? [] : calculateCalendar(), [trainings, selectedMonth])
 
     return (
         <TrainingsContext.Provider value={{ trainings, loading, deleteTrainingById, setTrainings, calendar, setSelectedDate, selectedDate }}>

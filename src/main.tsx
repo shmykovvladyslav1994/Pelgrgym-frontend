@@ -9,13 +9,13 @@ import { AuthProvider } from './context/auth-context.tsx'
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <GoogleOAuthProvider clientId={clientId}>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </GoogleOAuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
+  // <StrictMode>
+  <BrowserRouter>
+    <GoogleOAuthProvider clientId={clientId}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  </BrowserRouter>
+  /* </StrictMode>, */
 )
