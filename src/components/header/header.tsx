@@ -13,7 +13,7 @@ function Header() {
         <Link to="/">
           <img src="/src/shared/img/logo.png" alt="Logo" className="h-8" />
         </Link>
-        {links.map(link => (
+        {HEADER_LINKS.map(link => (
           !!user && (
             <Link key={link.to} to={link.to} className="hover:text-blue-400 transition">
               {link.label}
