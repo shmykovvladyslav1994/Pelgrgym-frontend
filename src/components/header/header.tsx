@@ -11,7 +11,7 @@ function Header() {
     <header className="flex items-center justify-between bg-slate-800 text-white px-6 py-4">
       <nav className="flex gap-4">
         <Link to="/">
-          <img src="/src/shared/img/logo.png" alt="Logo" className="h-8" />
+          <img src="logo.png" alt="Logo" className="h-8" />
         </Link>
         {HEADER_LINKS.map(link => (
           !!user && (
