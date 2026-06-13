@@ -24,7 +24,6 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
 
     // проверка при старте
     useEffect(() => {
-        trainingEvents
         let trainingsRes: ITraining[]
         api.get('/trainings').then(
             res => {
@@ -83,8 +82,12 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
         return { start, end }
     }
 
-    const calculateIncrementsFromStart = (current: dayjs.Dayjs, createdAt: dayjs.Dayjs, trainingCycle: { workDays: number, restDays: number }, incrementIntervalPerDays: number) => {
-        const daysFromStart = current.diff(createdAt.startOf('day'), 'day');
+    const calculateWorkDays = (
+        date: dayjs.Dayjs,
+        createdAt: dayjs.Dayjs,
+        trainingCycle: { workDays: number, restDays: number }
+    ) => {
+        const daysFromStart = date.startOf('day').diff(createdAt.startOf('day'), 'day');
         const { workDays, restDays } =
             trainingCycle;
         const fullCycle = workDays + restDays;
@@ -92,13 +95,74 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
             Math.floor(daysFromStart / fullCycle);
         const remainingDays =
             daysFromStart % fullCycle;
-        const workDaysFromStart =
-            completedCycles * workDays +
-            Math.min(remainingDays, workDays);
-        return Math.floor(workDaysFromStart / incrementIntervalPerDays);
+        return completedCycles * workDays +
+            Math.min(remainingDays, workDays)
     }
 
-    const calculateIsRestDay = (current: dayjs.Dayjs, createdAt: dayjs.Dayjs, trainingCycle: { workDays: number, restDays: number },) => {
+    const calculateAdjustmentByEvents = (
+        currentDate: dayjs.Dayjs,
+        createdAt: dayjs.Dayjs,
+        trainingCycle: { workDays: number, restDays: number },
+        incrementsFromStart: number,
+        incrementIntervalPerDays: number,
+        events: Map<string, trainingEventResult> = new Map()
+    ) => {
+        const eventsBeforeCurrentDay = new Map<string, trainingEventResult>();
+        events.forEach((value, date) => {
+            if (dayjs(date).isBefore(currentDate, 'day')) {
+                eventsBeforeCurrentDay.set(date, value)
+            }
+        });
+        const workDaysFromStart = calculateWorkDays(currentDate, createdAt, trainingCycle);
+
+        const dateNow = dayjs()
+        const isFuture = dateNow.isBefore(currentDate, 'day')
+        let futureAdjustment = 0;
+
+        if (isFuture) {
+            const workDaysFromStartToNow = calculateWorkDays(dateNow, createdAt, trainingCycle)
+            futureAdjustment = workDaysFromStart - workDaysFromStartToNow
+        }
+
+        let eventResultCounter = 0;
+
+        const trainingBreaks = workDaysFromStart - eventsBeforeCurrentDay.size - futureAdjustment;
+        for (let i = 1; i <= trainingBreaks; i++) {
+            if (i % 3 === 0) {
+                eventResultCounter--
+            }
+        }
+
+        eventsBeforeCurrentDay.forEach((value) => {
+            switch (value) {
+                case 'Easy':
+                    eventResultCounter++;
+                    break;
+                case 'Uncompleted':
+                    eventResultCounter--;
+            }
+        })
+
+        return incrementsFromStart - Math.floor((eventResultCounter + futureAdjustment) / incrementIntervalPerDays)
+    }
+
+    const calculateIncrementsFromStart = (
+        current: dayjs.Dayjs,
+        createdAt: dayjs.Dayjs,
+        trainingCycle: { workDays: number, restDays: number },
+        incrementIntervalPerDays: number,
+        trainingId: number
+    ) => {
+        const workDaysFromStart = calculateWorkDays(current, createdAt, trainingCycle);
+        const awaitedIncrement = Math.floor(workDaysFromStart / incrementIntervalPerDays);
+
+        const events = trainingEvents.get(trainingId);
+        const adjustmentByEvents = calculateAdjustmentByEvents(current, createdAt, trainingCycle, awaitedIncrement, incrementIntervalPerDays, events);
+
+        return awaitedIncrement - adjustmentByEvents;
+    }
+
+    const calculateIsRestDay = (current: dayjs.Dayjs, createdAt: dayjs.Dayjs, trainingCycle: { workDays: number, restDays: number }) => {
         const daysFromStart = current.diff(createdAt.startOf('day'), 'day');
         const fullCycle = trainingCycle.workDays + trainingCycle.restDays;
         const completedCycles =
@@ -116,7 +180,7 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
         for (let i = 1; i <= calendarDays; i++) {
             const exercises = trainings.reduce((
                 acc,
-                { createdAt, name, sets, trainingCycle, incrementOrder, incrementValue, incrementIntervalPerDays }
+                { createdAt, name, sets, trainingCycle, incrementOrder, incrementValue, incrementIntervalPerDays, id }
             ) => {
                 if (createdAt.isSame(current, 'day')) {
                     acc.push({
@@ -126,13 +190,14 @@ export function TrainingsProvider({ children }: { children: React.ReactNode }) {
                 }
 
                 if (createdAt.isBefore(current, 'day')) {
-                    const incrementsFromStart = calculateIncrementsFromStart(current, createdAt, trainingCycle, incrementIntervalPerDays)
+                    const incrementsFromStart = calculateIncrementsFromStart(current, createdAt, trainingCycle, incrementIntervalPerDays, id)
                     const isRestDay = calculateIsRestDay(current, createdAt, trainingCycle);
 
                     if (!isRestDay) {
                         const lastIndex = sets.length - 1;
                         let currentIncrementIndex = incrementOrder === 'Asc' ? 0 : lastIndex;
                         const newSets = sets.map(set => ({ ...set }));
+
                         for (let i = 1; i <= incrementsFromStart; i++) {
                             const setToIncrement = newSets.at(currentIncrementIndex)
                             setToIncrement && (setToIncrement.reps += incrementValue);

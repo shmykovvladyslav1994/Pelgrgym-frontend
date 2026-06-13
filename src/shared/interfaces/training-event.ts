@@ -5,4 +5,4 @@ export interface ITrainingEvent {
     trainingId: number;
 }
 
-export type trainingEventResult = 'Easy'
+export type trainingEventResult = 'Easy' | 'Normal' | 'Uncompleted';
